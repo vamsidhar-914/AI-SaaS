@@ -6,6 +6,10 @@ import { Geist } from "next/font/google";
 import { TRPCReactProvider } from "~/trpc/react";
 import { ThemeProvider } from "./_components/ThemeProvider";
 import { cn } from "~/lib/utils";
+import Navbar from "./_components/Navbar";
+
+import "react-loading-skeleton/dist/skeleton.css";
+import { Toaster } from "~/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "AI-SaaS",
@@ -23,7 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn("min-h-screen font-sans antialiased grainy", geist.className)}>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          <Toaster />
+          <Navbar />
+          {children}
+          </TRPCReactProvider>
       </body>
     </html>
   );

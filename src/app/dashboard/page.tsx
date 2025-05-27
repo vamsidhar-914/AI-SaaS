@@ -2,6 +2,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server"
 import { redirect } from "next/navigation"
 import Navbar from "../_components/Navbar"
 import { db } from "~/server/db"
+import Dashboard from "../_components/Dashboard"
 
 const DashboardPage = async () => {
     const { getUser } = getKindeServerSession()
@@ -19,11 +20,7 @@ const DashboardPage = async () => {
     
     return(
       <>
-        <Navbar />
-        <div>
-            <h1>This is a dashboard</h1>
-            <h1>{user?.email}</h1>
-        </div>
+       <Dashboard />
       </>
     )   
 }

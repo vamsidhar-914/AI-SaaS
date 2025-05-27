@@ -9,7 +9,7 @@ import AuthCallbackComponent from "../_components/AuthCallbackComponent"
 
 export default function Page(){
     return (
-      <Suspense fallback={"one moment please..."}>
+      <Suspense fallback={""}>
         <AuthCallbackComponent />
       </Suspense>
     )
