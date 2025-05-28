@@ -36,7 +36,7 @@ function UploadDropZone() {
     setUploadProgress(0);
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
-        if (prev >= 10) {
+        if (prev >= 95) {
           clearInterval(interval);
           return prev;
         }
