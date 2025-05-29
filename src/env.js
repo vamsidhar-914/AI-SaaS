@@ -20,7 +20,6 @@ export const env = createEnv({
     KINDE_POST_LOGIN_REDIRECT_URL: z.string().url(),
     UPLOADTHING_TOKEN:z.string(),
     PINECONE_API_KEY:z.string(),
-    OPENAI_API_KEY:z.string()
   },
 
 
@@ -49,7 +48,6 @@ export const env = createEnv({
     KINDE_POST_LOGIN_REDIRECT_URL: process.env.KINDE_POST_LOGIN_REDIRECT_URL,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     PINECONE_API_KEY: process.env.PINECONE_API_KEY,
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
