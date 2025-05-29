@@ -15,14 +15,12 @@ const trpcUtils = api.useUtils()
   const { data: files, isLoading } = api.file.getUserFiles.useQuery();
   const { mutate: deleteFile,isPending,error } = api.file.deleteUserFile.useMutation({
     onSuccess(data, variables, context) {
-       if(data.success){
         trpcUtils.file.getUserFiles.setData(undefined , (oldData) => {
             if(oldData == null) return;
             return {
                 ...oldData.filter((file) => file.id !== variables.id)
             }
         })
-       }
     },
     onMutate({ id }){
         setCurrentlyDeleting(id)

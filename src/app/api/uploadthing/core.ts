@@ -2,6 +2,12 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { db } from "~/server/db";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"
+import { PineconeStore } from '@langchain/pinecone'
+import { pc } from "~/lib/pinecone";
+import { toast } from "~/hooks/use-toast";
+import { OllamaEmbeddings } from "@langchain/ollama"
+
 
 const f = createUploadthing();
 
@@ -31,6 +37,57 @@ export const ourFileRouter = {
             uploadStatus: "PROCESSING"
           }
         })
+
+        // langchain
+        try{
+          const response = await fetch(createdFile.url)
+          const blob = await response.blob()
+          const loader = new PDFLoader(blob);
+          const pageLevelDocs = await loader.load()
+          const pagesAmt = pageLevelDocs.length
+          
+          // vectorize and index entire document
+          const pineconeIndex = pc.Index("chatdoc-saas")
+              const embeddings = new OllamaEmbeddings({
+                  model: "llama3.2:latest", // Default value
+                  baseUrl: "http://localhost:11434", // Default value
+                });
+          await PineconeStore.fromDocuments(pageLevelDocs,embeddings,{
+            //@ts-ignore
+            pineconeIndex,
+            namespace: createdFile.id
+          })
+
+          await db.file.update({
+            data: {
+              uploadStatus: "COMPLETED"
+            },
+            where: {
+              id: createdFile.id
+            }
+          })
+          toast({
+            title: "File uploaded status",
+            description: "COMPLETED",
+            variant: "default"
+          })
+        }catch(err){
+          console.log("error", err)
+          await db.file.update({
+            where: {
+              id: createdFile.id
+            },
+            data: {
+              uploadStatus: "FAILED"
+            }
+          })
+          toast({
+            title: "File uploaded Status",
+            description: "FAILED",
+            variant: "destructive"
+          })
+        }
+
         return {
           id: createdFile.id,
           userId: createdFile.userId,
