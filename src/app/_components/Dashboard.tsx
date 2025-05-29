@@ -15,12 +15,15 @@ const trpcUtils = api.useUtils()
   const { data: files, isLoading } = api.file.getUserFiles.useQuery();
   const { mutate: deleteFile,isPending,error } = api.file.deleteUserFile.useMutation({
     onSuccess(data, variables, context) {
-        trpcUtils.file.getUserFiles.setData(undefined , (oldData) => {
-            if(oldData == null) return;
-            return {
-                ...oldData.filter((file) => file.id !== variables.id)
-            }
-        })
+      trpcUtils.file.getUserFiles.invalidate()
+      // trpcUtils.file.getUserFiles.setData(undefined, (oldData) => {
+      //   if(oldData == null || oldData.length === 0){
+      //     return;
+      //   }
+      //   return {
+      //     ...oldData.filter((file) => file.id != variables.id )
+      //   }
+      // })
     },
     onMutate({ id }){
         setCurrentlyDeleting(id)
@@ -30,7 +33,6 @@ const trpcUtils = api.useUtils()
     }
   });
   
-  console.log(files)
 
   return (
     <main className="mx-auto max-w-7xl md:p-10">

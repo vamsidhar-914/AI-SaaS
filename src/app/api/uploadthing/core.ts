@@ -66,13 +66,9 @@ export const ourFileRouter = {
               id: createdFile.id
             }
           })
-          toast({
-            title: "File uploaded status",
-            description: "COMPLETED",
-            variant: "default"
-          })
+          console.log("indexing done")
         }catch(err){
-          console.log("error", err)
+          console.log("indexing failed", err)
           await db.file.update({
             where: {
               id: createdFile.id
@@ -80,11 +76,6 @@ export const ourFileRouter = {
             data: {
               uploadStatus: "FAILED"
             }
-          })
-          toast({
-            title: "File uploaded Status",
-            description: "FAILED",
-            variant: "destructive"
           })
         }
 
