@@ -123,7 +123,7 @@ USER INPUT: ${message}
   } catch (err) {
     console.error("Error in /api/message:", err);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: `err`},
       { status: 500 },
     );
   }
