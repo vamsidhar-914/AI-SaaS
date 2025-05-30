@@ -25,7 +25,6 @@ export const env = createEnv({
     WATSONX_EMBEDDING_MODEL: z.string(),
     WATSONX_CHAT_MODEL: z.string(),
     WATSONX_SERVICE_URL:z.string(),
-
   },
 
 
