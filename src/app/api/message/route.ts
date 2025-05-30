@@ -44,9 +44,9 @@ export async function POST(req: NextRequest,res: NextResponse) {
     const embeddings = new WatsonxEmbeddings({
       watsonxAIAuthType: "iam",
       watsonxAIApikey: env.WATSONX_API_KEY,
-      projectId: env.WATSONX_PROJECT_ID,
+      projectId: "86daf66f-b8fe-4c05-8333-f1d92548b88c",
       model: "intfloat/multilingual-e5-large",
-      serviceUrl: env.WATSONX_SERVICE_URL,
+      serviceUrl: "https://eu-de.ml.cloud.ibm.com",
       version: "2022-01-01",
     });
     const pineconeIndex = pc.Index("saas");
@@ -94,13 +94,13 @@ USER INPUT: ${message}
       authenticator: new IamAuthenticator({
         apikey: env.WATSONX_API_KEY,
       }),
-      serviceUrl: env.WATSONX_SERVICE_URL,
+      serviceUrl: "https://eu-de.ml.cloud.ibm.com",
       version: "2022-01-01",
     });
     const textGeneration = await watsonxAIService.generateText({
       input: prompt,
-      modelId: env.WATSONX_CHAT_MODEL,
-      projectId: env.WATSONX_PROJECT_ID,
+      modelId: "ibm/granite-3-3-8b-instruct",
+      projectId: "86daf66f-b8fe-4c05-8333-f1d92548b88c",
       parameters: {
         max_new_tokens: 100,
         decoding_method: "greedy",
