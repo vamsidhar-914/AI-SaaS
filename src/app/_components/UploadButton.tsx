@@ -22,7 +22,7 @@ function UploadDropZone() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
 
-  const { startUpload } = useUploadThing("pdfUploader");
+  const { startUpload ,routeConfig} = useUploadThing("pdfUploader");
   const trpcUtils = api.useUtils();
   const { mutate: startPolling } = api.file.getFile.useMutation({
     onSuccess(data) {
@@ -53,6 +53,7 @@ function UploadDropZone() {
       onDrop={async (acceptedFiles) => {
         setIsUploading(true);
         const progressInterval = startSimulatedProgress();
+        console.log(routeConfig)
 
         // handle file upload logic here
         const res = await startUpload(acceptedFiles);

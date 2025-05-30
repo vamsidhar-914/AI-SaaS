@@ -7,6 +7,11 @@ import { PineconeStore } from '@langchain/pinecone'
 import { pc } from "~/lib/pinecone";
 import { toast } from "~/hooks/use-toast";
 import { OllamaEmbeddings } from "@langchain/ollama"
+// import { WatsonxEmbeddings } from "@langchain/community/embeddings/ibm";
+import { WatsonxEmbeddings } from "@langchain/community/embeddings/ibm"
+import { WatsonXAI } from "@ibm-cloud/watsonx-ai"
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
+import { env } from "~/env";
 
 
 const f = createUploadthing();
@@ -40,23 +45,47 @@ export const ourFileRouter = {
 
         // langchain
         try{
-          const response = await fetch(createdFile.url)
-          const blob = await response.blob()
-          const loader = new PDFLoader(blob);
-          const pageLevelDocs = await loader.load()
-          const pagesAmt = pageLevelDocs.length
-          
-          // vectorize and index entire document
-          const pineconeIndex = pc.Index("chatdoc-saas")
-              const embeddings = new OllamaEmbeddings({
-                  model: "llama3.2:latest", // Default value
-                  baseUrl: "http://localhost:11434", // Default value
-                });
-          await PineconeStore.fromDocuments(pageLevelDocs,embeddings,{
-            //@ts-ignore
-            pineconeIndex,
-            namespace: createdFile.id
+          const textSplitter = new RecursiveCharacterTextSplitter({
+            chunkSize: 1000,
+            chunkOverlap: 200
           })
+
+            const response = await fetch(createdFile.url)
+            const blob = await response.blob()
+            const loader = new PDFLoader(blob);
+            const pageLevelDocs = await loader.load()
+            const pagesAmt = pageLevelDocs.length
+            
+            // vectorize and index entire document
+            const pineconeIndex = pc.Index("saas")
+                // const embeddings = new OllamaEmbeddings({
+                //     model: "llama3.2:latest", // Default value
+                //     baseUrl: "http://localhost:11434", // Default value
+                //   });J
+
+                const embeddings = new WatsonxEmbeddings({
+                  watsonxAIAuthType:"iam",
+                  watsonxAIApikey: env.WATSONX_API_KEY,
+                  projectId: "86daf66f-b8fe-4c05-8333-f1d92548b88c",
+                  model: "intfloat/multilingual-e5-large",
+                  serviceUrl: "https://eu-de.ml.cloud.ibm.com",
+                  version: "2022-01-01"
+                })
+            let chunkdocs = []
+            for(const pageDoc of pageLevelDocs){
+              const chunks = await textSplitter.splitText(pageDoc.pageContent)
+              for(const chunk of chunks){
+                chunkdocs.push({
+                  ...pageDoc,
+                  pageContent: chunk
+                })
+              }
+            }
+            await PineconeStore.fromDocuments(chunkdocs,embeddings,{
+              //@ts-ignore
+              pineconeIndex,
+              namespace: createdFile.id
+            })
 
           await db.file.update({
             data: {
@@ -66,7 +95,6 @@ export const ourFileRouter = {
               id: createdFile.id
             }
           })
-          console.log("indexing done")
         }catch(err){
           console.log("indexing failed", err)
           await db.file.update({

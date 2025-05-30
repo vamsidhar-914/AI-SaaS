@@ -20,6 +20,11 @@ export const env = createEnv({
     KINDE_POST_LOGIN_REDIRECT_URL: z.string().url(),
     UPLOADTHING_TOKEN:z.string(),
     PINECONE_API_KEY:z.string(),
+    WATSONX_API_KEY:z.string(),
+    WATSONX_PROJECT_ID:z.string(),
+    WATSONX_EMBEDDING_MODEL: z.string(),
+    WATSONX_CHAT_MODEL: z.string(),
+    WATSONX_SERVICE_URL:z.string()
   },
 
 
@@ -48,6 +53,11 @@ export const env = createEnv({
     KINDE_POST_LOGIN_REDIRECT_URL: process.env.KINDE_POST_LOGIN_REDIRECT_URL,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     PINECONE_API_KEY: process.env.PINECONE_API_KEY,
+    WATSONX_API_KEY: process.env.WATSONX_API_KEY,
+    WATSONX_PROJECT_ID: process.env.WATSONX_PROJECT_ID,
+    WATSONX_EMBEDDING_MODEL: process.env.WATSONX_EMBEDDING_MODEL,
+    WATSONX_CHAT_MODEL: process.env.WATSONX_CHAT_MODEL,
+    WATSONX_SERVICE_URL:process.env.WATSONX_SERVICE_URL
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**

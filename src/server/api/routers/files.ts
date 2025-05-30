@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { INFINITE_QUERY_LIMIT } from "~/config/infiniteQueries";
 
 export const fileRouter = createTRPCRouter({
     getUserFiles: protectedProcedure
@@ -65,5 +66,48 @@ export const fileRouter = createTRPCRouter({
                 return { status: "PENDING" as const }
             }
             return { status: file.uploadStatus }
+        }),
+    getAllMessages: protectedProcedure
+        .input(z.object({
+            fileId: z.string(),
+            limit: z.number().min(1).max(100).nullish(),
+            cursor: z.string().nullish()
+        })).query(async ({ ctx,input }) => {
+            const { fileId,cursor } = input
+            const { userId } = ctx
+            const limit = input.limit ?? INFINITE_QUERY_LIMIT
+
+            const file = await ctx.db.file.findFirst({
+                where: {
+                    id: input.fileId,
+                    userId
+                }
+            })
+            if(!file) throw new TRPCError({ code:"NOT_FOUND" })
+            const messages = await ctx.db.message.findMany({
+        take: limit +1,
+                where: {
+                    fileId
+                },
+                orderBy: {
+                    createdAt: "desc"
+                },
+                cursor: cursor ? { id: cursor } : undefined,
+                select: {
+                    id: true,
+                    isUserMessage: true,
+                    createdAt: true,
+                    text: true
+                }
+            })
+            let nextCursor: typeof cursor | undefined = undefined
+            if(messages.length > limit){
+                const nextItem = messages.pop()
+                nextCursor = nextItem?.id
+            }
+            return {
+                messages,
+                nextCursor
+            }
         })
 })
