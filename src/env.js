@@ -25,7 +25,7 @@ export const env = createEnv({
     WATSONX_EMBEDDING_MODEL: z.string(),
     WATSONX_CHAT_MODEL: z.string(),
     WATSONX_SERVICE_URL:z.string(),
-    PRODUCTION_URL:z.string()
+
   },
 
 
@@ -36,6 +36,7 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_PRODUCTION_URL: z.string()
   },
 
   /**
@@ -59,7 +60,7 @@ export const env = createEnv({
     WATSONX_EMBEDDING_MODEL: process.env.WATSONX_EMBEDDING_MODEL,
     WATSONX_CHAT_MODEL: process.env.WATSONX_CHAT_MODEL,
     WATSONX_SERVICE_URL:process.env.WATSONX_SERVICE_URL,
-    PRODUCTION_URL: process.env.PRODUCTION_URL
+    NEXT_PUBLIC_PRODUCTION_URL: process.env.NEXT_PUBLIC_PRODUCTION_URL
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
