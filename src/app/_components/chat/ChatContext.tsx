@@ -24,7 +24,7 @@ type Props = {
     children: ReactNode
 }
 
-const url = env.NEXT_PUBLIC_PRODUCTION_URL
+const url = "https://aichat-saas.netlify.app/api/message"
 
 export const ChatContextProvider = ({ fileId,children }: Props) => {
     const [message, setMessage] = useState<string>("")
