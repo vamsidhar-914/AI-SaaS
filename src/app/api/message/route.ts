@@ -45,7 +45,7 @@ export async function POST(req: NextRequest,res: NextResponse) {
       watsonxAIAuthType: "iam",
       watsonxAIApikey: env.WATSONX_API_KEY,
       projectId: env.WATSONX_PROJECT_ID,
-      model: env.WATSONX_EMBEDDING_MODEL,
+      model: "intfloat/multilingual-e5-large",
       serviceUrl: env.WATSONX_SERVICE_URL,
       version: "2022-01-01",
     });
