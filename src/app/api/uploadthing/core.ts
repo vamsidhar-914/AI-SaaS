@@ -66,9 +66,9 @@ export const ourFileRouter = {
                 const embeddings = new WatsonxEmbeddings({
                   watsonxAIAuthType:"iam",
                   watsonxAIApikey: env.WATSONX_API_KEY,
-                  projectId: "86daf66f-b8fe-4c05-8333-f1d92548b88c",
-                  model: "intfloat/multilingual-e5-large",
-                  serviceUrl: "https://eu-de.ml.cloud.ibm.com",
+                  projectId: env.WATSONX_PROJECT_ID,
+                  model:env.WATSONX_EMBEDDING_MODEL,
+                  serviceUrl: env.WATSONX_SERVICE_URL,
                   version: "2022-01-01"
                 })
             let chunkdocs = []
