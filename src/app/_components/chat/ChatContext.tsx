@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { createContext, useRef, useState, type ReactNode } from "react";
 import { INFINITE_QUERY_LIMIT } from "~/config/infiniteQueries";
+import { env } from "~/env";
 import { toast } from "~/hooks/use-toast";
 import { api } from "~/trpc/react";
 
@@ -23,6 +24,8 @@ type Props = {
     children: ReactNode
 }
 
+const url = env.PRODUCTION_URL
+
 export const ChatContextProvider = ({ fileId,children }: Props) => {
     const [message, setMessage] = useState<string>("")
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -30,7 +33,7 @@ export const ChatContextProvider = ({ fileId,children }: Props) => {
     const trpcUtils = api.useUtils()
     const { mutate: sendMessage } = useMutation({
         mutationFn: async ({ message }: { message: string }) => {
-            const res = await fetch("/api/message", {
+            const res = await fetch(url, {
                 method: "POST",
                 body: JSON.stringify({
                     fileId,
