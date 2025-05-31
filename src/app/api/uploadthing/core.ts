@@ -7,9 +7,7 @@ import { PineconeStore } from '@langchain/pinecone'
 import { pc } from "~/lib/pinecone";
 import { toast } from "~/hooks/use-toast";
 import { OllamaEmbeddings } from "@langchain/ollama"
-// import { WatsonxEmbeddings } from "@langchain/community/embeddings/ibm";
 import { WatsonxEmbeddings } from "@langchain/community/embeddings/ibm"
-import { WatsonXAI } from "@ibm-cloud/watsonx-ai"
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
 import { createClient } from "@supabase/supabase-js"
