@@ -11,6 +11,8 @@ import { OllamaEmbeddings } from "@langchain/ollama"
 import { WatsonxEmbeddings } from "@langchain/community/embeddings/ibm"
 import { WatsonXAI } from "@ibm-cloud/watsonx-ai"
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
+import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
+import { createClient } from "@supabase/supabase-js"
 import { env } from "~/env";
 
 
@@ -55,9 +57,14 @@ export const ourFileRouter = {
             const loader = new PDFLoader(blob);
             const pageLevelDocs = await loader.load()
             const pagesAmt = pageLevelDocs.length
-            
+
+            const supabaseClient = createClient(
+              env.SUPABASE_URL,
+              env.SUPABASE_PRIVATE_KEY
+            )
+
             // vectorize and index entire document
-            const pineconeIndex = pc.Index("saas")
+            // const pineconeIndex = pc.Index("saas")
                 // const embeddings = new OllamaEmbeddings({
                 //     model: "llama3.2:latest", // Default value
                 //     baseUrl: "http://localhost:11434", // Default value
@@ -71,6 +78,8 @@ export const ourFileRouter = {
                   serviceUrl: env.WATSONX_SERVICE_URL,
                   version: "2022-01-01"
                 })
+
+            
             let chunkdocs = []
             for(const pageDoc of pageLevelDocs){
               const chunks = await textSplitter.splitText(pageDoc.pageContent)
@@ -81,11 +90,18 @@ export const ourFileRouter = {
                 })
               }
             }
-            await PineconeStore.fromDocuments(chunkdocs,embeddings,{
-              //@ts-ignore
-              pineconeIndex,
-              namespace: createdFile.id
+            await SupabaseVectorStore.fromDocuments(chunkdocs,embeddings,
+              {
+              client: supabaseClient,
+              tableName: 'documents',
+              queryName: "match_documents"
             })
+
+            // await PineconeStore.fromDocuments(chunkdocs,embeddings,{
+            //   //@ts-ignore
+            //   pineconeIndex,
+            //   namespace: createdFile.id
+            // })
 
           await db.file.update({
             data: {

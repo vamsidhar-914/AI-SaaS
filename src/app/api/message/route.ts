@@ -9,6 +9,9 @@ import { pc } from "~/lib/pinecone";
 import { SendMessageValidator } from "~/lib/validators/validator";
 import { db } from "~/server/db";
 import { IamAuthenticator } from "ibm-cloud-sdk-core";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import { createClient } from "@supabase/supabase-js";
+import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 
 export async function POST(req: NextRequest,res: NextResponse) {
   try {
@@ -49,12 +52,23 @@ export async function POST(req: NextRequest,res: NextResponse) {
       serviceUrl: "https://eu-de.ml.cloud.ibm.com",
       version: "2022-01-01",
     });
-    const pineconeIndex = pc.Index("saas");
+    // const pineconeIndex = pc.Index("saas");
 
-    const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
-      pineconeIndex,
-      namespace: file.id,
-    });
+    // const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+    //   pineconeIndex,
+    //   namespace: file.id,
+    // });
+
+    const supabaseClient = createClient(
+                env.SUPABASE_URL,
+                  env.SUPABASE_PRIVATE_KEY,
+            )
+    console.log("querying...vectorStore")
+    const vectorStore = await SupabaseVectorStore.fromExistingIndex(embeddings,{
+        client: supabaseClient,
+        tableName: 'documents',
+        queryName: "match_documents"
+    })
 
     const results = await vectorStore.similaritySearch(message, 4);
 
@@ -109,6 +123,17 @@ USER INPUT: ${message}
 
     const responseData = textGeneration.result.results[0]?.generated_text
 
+    // const llm = new ChatOllama({
+    //     baseUrl: "http://localhost:11434",
+    //     model: "llama3.2:latest",
+    //     temperature: 0,
+    //     numPredict: 450
+    // })
+
+    // const chain = llm.pipe(new StringOutputParser())
+    // const response = await chain.invoke(prompt)
+
+    // console.log("response",response);
 
     await db.message.create({
       data: {
