@@ -1,15 +1,11 @@
 import { WatsonXAI } from "@ibm-cloud/watsonx-ai";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { WatsonxEmbeddings } from "@langchain/community/embeddings/ibm";
-import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
-import { PineconeStore } from "@langchain/pinecone";
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "~/env";
-import { pc } from "~/lib/pinecone";
 import { SendMessageValidator } from "~/lib/validators/validator";
 import { db } from "~/server/db";
 import { IamAuthenticator } from "ibm-cloud-sdk-core";
-import { StringOutputParser } from "@langchain/core/output_parsers";
 import { createClient } from "@supabase/supabase-js";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 
@@ -52,18 +48,11 @@ export async function POST(req: NextRequest,res: NextResponse) {
       serviceUrl: "https://eu-de.ml.cloud.ibm.com",
       version: "2022-01-01",
     });
-    // const pineconeIndex = pc.Index("saas");
-
-    // const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
-    //   pineconeIndex,
-    //   namespace: file.id,
-    // });
 
     const supabaseClient = createClient(
                 env.SUPABASE_URL,
                   env.SUPABASE_PRIVATE_KEY,
             )
-    console.log("querying...vectorStore")
     const vectorStore = await SupabaseVectorStore.fromExistingIndex(embeddings,{
         client: supabaseClient,
         tableName: 'documents',
@@ -116,7 +105,7 @@ USER INPUT: ${message}
       modelId: "ibm/granite-3-3-8b-instruct",
       projectId: "86daf66f-b8fe-4c05-8333-f1d92548b88c",
       parameters: {
-        max_new_tokens: 100,
+        max_new_tokens: 450,
         decoding_method: "greedy",
       },
     });

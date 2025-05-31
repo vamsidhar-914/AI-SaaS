@@ -3,10 +3,6 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { db } from "~/server/db";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"
-import { PineconeStore } from '@langchain/pinecone'
-import { pc } from "~/lib/pinecone";
-import { toast } from "~/hooks/use-toast";
-import { OllamaEmbeddings } from "@langchain/ollama"
 import { WatsonxEmbeddings } from "@langchain/community/embeddings/ibm"
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
@@ -61,13 +57,6 @@ export const ourFileRouter = {
               env.SUPABASE_PRIVATE_KEY
             )
 
-            // vectorize and index entire document
-            // const pineconeIndex = pc.Index("saas")
-                // const embeddings = new OllamaEmbeddings({
-                //     model: "llama3.2:latest", // Default value
-                //     baseUrl: "http://localhost:11434", // Default value
-                //   });J
-
                 const embeddings = new WatsonxEmbeddings({
                   watsonxAIAuthType:"iam",
                   watsonxAIApikey: env.WATSONX_API_KEY,
@@ -94,12 +83,6 @@ export const ourFileRouter = {
               tableName: 'documents',
               queryName: "match_documents"
             })
-
-            // await PineconeStore.fromDocuments(chunkdocs,embeddings,{
-            //   //@ts-ignore
-            //   pineconeIndex,
-            //   namespace: createdFile.id
-            // })
 
           await db.file.update({
             data: {

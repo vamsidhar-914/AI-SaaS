@@ -33,7 +33,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
   const trpcUtils = api.useUtils();
   const { mutate: sendMessage } = useMutation({
     mutationFn: async ({ message }: { message: string }) => {
-      const res = await fetch(url, {
+      const res = await fetch("/api/message", {
         method: "POST",
         body: JSON.stringify({
           fileId,
