@@ -6,10 +6,12 @@ import { env } from "~/env";
 import { SendMessageValidator } from "~/lib/validators/validator";
 import { db } from "~/server/db";
 import { IamAuthenticator } from "ibm-cloud-sdk-core";
+import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
 import { createClient } from "@supabase/supabase-js";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
+import { StringOutputParser } from "@langchain/core/output_parsers";
 
-export async function POST(req: NextRequest,res: NextResponse) {
+export async function POST(req: NextRequest, res: NextResponse) {
   try {
     const body = await req.json();
     const { getUser } = getKindeServerSession();
@@ -50,14 +52,17 @@ export async function POST(req: NextRequest,res: NextResponse) {
     });
 
     const supabaseClient = createClient(
-                env.SUPABASE_URL,
-                  env.SUPABASE_PRIVATE_KEY,
-            )
-    const vectorStore = await SupabaseVectorStore.fromExistingIndex(embeddings,{
+      env.SUPABASE_URL,
+      env.SUPABASE_PRIVATE_KEY,
+    );
+    const vectorStore = await SupabaseVectorStore.fromExistingIndex(
+      embeddings,
+      {
         client: supabaseClient,
-        tableName: 'documents',
-        queryName: "match_documents"
-    })
+        tableName: "documents",
+        queryName: "match_documents",
+      },
+    );
 
     const results = await vectorStore.similaritySearch(message, 4);
 
@@ -105,7 +110,7 @@ USER INPUT: ${message}
       modelId: "ibm/granite-3-3-8b-instruct",
       projectId: "86daf66f-b8fe-4c05-8333-f1d92548b88c",
       parameters: {
-        max_new_tokens: 450,
+        max_new_tokens: 100,
         decoding_method: "greedy",
       },
     });
@@ -113,16 +118,14 @@ USER INPUT: ${message}
     const responseData = textGeneration.result.results[0]?.generated_text
 
     // const llm = new ChatOllama({
-    //     baseUrl: "http://localhost:11434",
-    //     model: "llama3.2:latest",
-    //     temperature: 0,
-    //     numPredict: 450
-    // })
+    //   baseUrl: "http://localhost:11434",
+    //   model: "llama3.2:latest",
+    //   temperature: 0,
+    //   numPredict: 450,
+    // });
 
-    // const chain = llm.pipe(new StringOutputParser())
-    // const response = await chain.invoke(prompt)
-
-    // console.log("response",response);
+    // const chain = llm.pipe(new StringOutputParser());
+    // const responseData = await chain.invoke(prompt);
 
     await db.message.create({
       data: {
@@ -136,9 +139,6 @@ USER INPUT: ${message}
     return NextResponse.json(responseData);
   } catch (err) {
     console.error("Error in /api/message:", err);
-    return NextResponse.json(
-      { error: `err:${err}`},
-      { status: 500 },
-    );
+    return NextResponse.json({ error: `err:${err}` }, { status: 500 });
   }
 }
