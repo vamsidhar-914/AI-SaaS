@@ -10,6 +10,8 @@ import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
 import { createClient } from "@supabase/supabase-js";
 import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase";
 import { StringOutputParser } from "@langchain/core/output_parsers";
+import OpenAI from 'openai'
+import { OpenAIStream, StreamingTextResponse  } from "ai"
 
 export async function POST(req: NextRequest, res: NextResponse) {
   try {
@@ -61,10 +63,13 @@ export async function POST(req: NextRequest, res: NextResponse) {
         client: supabaseClient,
         tableName: "documents",
         queryName: "match_documents",
+        filter: {
+          fileId: fileId
+        }
       },
     );
 
-    const results = await vectorStore.similaritySearch(message, 4);
+    const results = await vectorStore.similaritySearch(message, 4 );
 
     const prevMessages = await db.message.findMany({
       where: { fileId },
@@ -98,45 +103,92 @@ ${results.map((r) => r.pageContent).join("\n\n")}
 USER INPUT: ${message}
         `.trim();
 
-    const watsonxAIService = WatsonXAI.newInstance({
-      authenticator: new IamAuthenticator({
-        apikey: env.WATSONX_API_KEY,
-      }),
-      serviceUrl: "https://eu-de.ml.cloud.ibm.com",
-      version: "2022-01-01",
-    });
-    const textGeneration = await watsonxAIService.generateText({
-      input: prompt,
-      modelId: "ibm/granite-3-3-8b-instruct",
-      projectId: "86daf66f-b8fe-4c05-8333-f1d92548b88c",
-      parameters: {
-        max_new_tokens: 100,
-        decoding_method: "greedy",
-      },
-    });
+    // const watsonxAIService = WatsonXAI.newInstance({
+    //   authenticator: new IamAuthenticator({
+    //     apikey: env.WATSONX_API_KEY,
+    //   }),
+    //   serviceUrl: "https://eu-de.ml.cloud.ibm.com",
+    //   version: "2022-01-01",
+    // });
+    // const textGeneration = await watsonxAIService.generateText({
+    //   input: prompt,
+    //   modelId: "ibm/granite-3-3-8b-instruct",
+    //   projectId: "86daf66f-b8fe-4c05-8333-f1d92548b88c",
+    //   parameters: {
+    //     max_new_tokens: 100,
+    //     decoding_method: "greedy",
+    //   },
+    // });
 
-    const responseData = textGeneration.result.results[0]?.generated_text
+    // const responseData = textGeneration.result.results[0]?.generated_text
 
     // const llm = new ChatOllama({
     //   baseUrl: "http://localhost:11434",
     //   model: "llama3.2:latest",
     //   temperature: 0,
-    //   numPredict: 450,
+    //   numPredict: 150,
     // });
 
     // const chain = llm.pipe(new StringOutputParser());
     // const responseData = await chain.invoke(prompt);
 
-    await db.message.create({
-      data: {
-        text: responseData!,
-        isUserMessage: false,
-        fileId,
-        userId,
-      },
-    });
+  // Use fetch to call OpenRouter API directly for streaming compatibility
+  const fetchResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer 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",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "meta-llama/llama-3.3-8b-instruct:free",
+      temperature: 0,
+      stream: true,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format.',
+        },
+        {
+          role: 'user',
+          content: `Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.
+          
+  \n----------------\n
+  
+  PREVIOUS CONVERSATION:
+  ${formattedPrevMessages.map((message) => {
+    if (message.role === 'user')
+      return `User: ${message.content}\n`
+    return `Assistant: ${message.content}\n`
+  })}
+  
+  \n----------------\n
+  
+  CONTEXT:
+  ${results.map((r) => r.pageContent).join('\n\n')}
+  
+  USER INPUT: ${message}`,
+        },
+      ],
+    }),
+  });
 
-    return NextResponse.json(responseData);
+  const stream = OpenAIStream(fetchResponse, {
+    async onCompletion(completion) {
+      await db.message.create({
+        data: {
+          text: completion,
+          isUserMessage: false,
+          fileId,
+          userId
+        }
+      })
+    }
+  });
+
+  return new StreamingTextResponse(stream);
+
+    // return NextResponse.json(responseData);
   } catch (err) {
     console.error("Error in /api/message:", err);
     return NextResponse.json({ error: `err:${err}` }, { status: 500 });

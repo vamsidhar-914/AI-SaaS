@@ -44,7 +44,6 @@ export default function Messages({ fileId }: { fileId: string }) {
 
   useEffect(() => {
     if(entry?.isIntersecting){
-        console.log("hello")
         fetchNextPage()
     }
   },[entry,fetchNextPage])

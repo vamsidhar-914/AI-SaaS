@@ -56,7 +56,6 @@ export const ourFileRouter = {
               env.SUPABASE_URL,
               env.SUPABASE_PRIVATE_KEY
             )
-
                 const embeddings = new WatsonxEmbeddings({
                   watsonxAIAuthType:"iam",
                   watsonxAIApikey: env.WATSONX_API_KEY,
@@ -73,12 +72,16 @@ export const ourFileRouter = {
               for(const chunk of chunks){
                 chunkdocs.push({
                   ...pageDoc,
-                  pageContent: chunk
+                  pageContent: chunk,
+                  metadata: {
+                    ...pageDoc.metadata,
+                    fileId: createdFile.id
+                  }
                 })
               }
             }
             await SupabaseVectorStore.fromDocuments(chunkdocs,embeddings,
-              {
+              { 
               client: supabaseClient,
               tableName: 'documents',
               queryName: "match_documents"
