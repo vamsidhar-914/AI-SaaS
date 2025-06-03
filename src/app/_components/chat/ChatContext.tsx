@@ -43,10 +43,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
       if (!res.ok) {
         throw new Error("failed to send a message");
       }
-      const response = await res.json();
-      console.log("response", response);
-
-      return response;
+      return res.body
     },
     onMutate: async ({ message }) => {
       backUpMessage.current = message;
@@ -98,7 +95,6 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
       let done = false;
 
       let accResponse = "";
-      let buffer = "";
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
