@@ -82,26 +82,26 @@ export async function POST(req: NextRequest, res: NextResponse) {
       content: msg.text,
     }));
 
-    const prompt = `
-Use the following pieces of context (or previous conversation if needed) to answer the user's question in markdown format.
-If you don't know the answer, just say that you don't know — don't try to make up an answer.
+//     const prompt = `
+// Use the following pieces of context (or previous conversation if needed) to answer the user's question in markdown format.
+// If you don't know the answer, just say that you don't know — don't try to make up an answer.
 
-----------------
+// ----------------
 
-PREVIOUS CONVERSATION:
-${formattedPrevMessages
-  .map((msg) =>
-    msg.role === "user" ? `User: ${msg.content}` : `Assistant: ${msg.content}`,
-  )
-  .join("\n")}
+// PREVIOUS CONVERSATION:
+// ${formattedPrevMessages
+//   .map((msg) =>
+//     msg.role === "user" ? `User: ${msg.content}` : `Assistant: ${msg.content}`,
+//   )
+//   .join("\n")}
 
-----------------
+// ----------------
 
-CONTEXT:
-${results.map((r) => r.pageContent).join("\n\n")}
+// CONTEXT:
+// ${results.map((r) => r.pageContent).join("\n\n")}
 
-USER INPUT: ${message}
-        `.trim();
+// USER INPUT: ${message}
+//         `.trim();
 
     // const watsonxAIService = WatsonXAI.newInstance({
     //   authenticator: new IamAuthenticator({
@@ -133,10 +133,10 @@ USER INPUT: ${message}
     // const responseData = await chain.invoke(prompt);
 
   // Use fetch to call OpenRouter API directly for streaming compatibility
-  const fetchResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+   const fetchResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
-      "Authorization": "Bearer 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",
+      "Authorization": `Bearer ${env.OPENROUTER_API_KEY}`,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
@@ -185,6 +185,7 @@ USER INPUT: ${message}
       })
     }
   });
+  
 
   return new StreamingTextResponse(stream);
 

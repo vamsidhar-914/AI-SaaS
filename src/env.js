@@ -25,7 +25,8 @@ export const env = createEnv({
     WATSONX_CHAT_MODEL: z.string(),
     WATSONX_SERVICE_URL:z.string(),
     SUPABASE_PRIVATE_KEY:z.string(),
-    SUPABASE_URL:z.string().url()
+    SUPABASE_URL:z.string().url(),
+    OPENROUTER_API_KEY:z.string()
   },
 
 
@@ -59,7 +60,8 @@ export const env = createEnv({
     WATSONX_CHAT_MODEL: process.env.WATSONX_CHAT_MODEL,
     WATSONX_SERVICE_URL:process.env.WATSONX_SERVICE_URL,
     SUPABASE_PRIVATE_KEY: process.env.SUPABASE_PRIVATE_KEY,
-    SUPABASE_URL: process.env.SUPABASE_URL
+    SUPABASE_URL: process.env.SUPABASE_URL,
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
